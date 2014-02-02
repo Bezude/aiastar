@@ -37,25 +37,48 @@ public class PerfectAI implements AIModule
             return (int) (a.costGuessTotal - b.costGuessTotal);
         }
     }
+
+    // private List<Point> reonstructPath(Point point) {
+    //     List<point> path = new List<Point>();
+    //     while(!(point.getPreviousNode() == null)) {
+    //         point.prependWayPoint(node);
+    //         point = point.getPreviousNode();
+    //     }
+    //     this.shortestPath = path;
+    //     return path;
+    // }
+
     /// Creates the path to the goal.
     public List<Point> createPath(final TerrainMap map)
     {
-        // Holds the resulting path
-        final ArrayList<Point> path = new ArrayList<Point>();
-
-    
+        // Holds the resulting path which we call the closedSet
+        final ArrayList<Point> closedSet = new ArrayList<Point>();
+        // The set of all nodes adjacent to nodes currently or previously picked as path nodes 
+        private ArrayList<Point> openSet = new ArrayList<Point>();
+        
 
         // Keep track of where we are and add the start point.
         final Point currentPoint = map.getStartPoint();
-        path.add(new Point(currentPoint));
+        closedSet.add(new Point(currentPoint));
 
         final Point target = map.getEndPoint();
+
+        while(!openSet.isEmpty()){
+            currentPoint = //next node with lowest f()
+            if (currentPoint = map.getEndPoint()) 
+                return reconstructPath(currentPoint);
+            openSet.remove(currentPoint);
+            closedSet.add(currentPoint);
+
+            ArrayList
+        }
+
         /*
         while(!(currentPoint.x == target.x && currentPoint.y == target.y)) {
 
         }
         */
         // We're done!  Hand it back.
-        return path;
+        return openSet;
     }
 }
