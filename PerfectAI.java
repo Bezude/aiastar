@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Stack;
 
 /// An implementation of A*
 /**
@@ -47,30 +49,52 @@ public class PerfectAI implements AIModule
     //     this.shortestPath = path;
     //     return path;
     // }
+    private List<Point> reconstructPath(PathNode p) {
+        Stack<Point> s = new Stack<Point>();
+        while(p.parent != null) {
+            s.push(p.location);
+            p = p.parent;
+        }
+        s.push(p.location);
+        return s;
+    }
 
     /// Creates the path to the goal.
     public List<Point> createPath(final TerrainMap map)
     {
+        ArrayList<Point> path = new ArrayList<Point>();
         // Holds the resulting path which we call the closedSet
-        final ArrayList<Point> closedSet = new ArrayList<Point>();
+        HashSet<PathNode> closedSet = new HashSet<PathNode>();
         // The set of all nodes adjacent to nodes currently or previously picked as path nodes 
-        private ArrayList<Point> openSet = new ArrayList<Point>();
+        TreeSet<PathNode> openSet = new TreeSet<PathNode>(new PathNodeComparator());
         
 
         // Keep track of where we are and add the start point.
-        final Point currentPoint = map.getStartPoint();
-        closedSet.add(new Point(currentPoint));
+        PathNode currentNode = new PathNode(map.getStartPoint(), null, 0, map.getTile(map.getStartPoint()));
+        openSet.add(currentNode);
 
         final Point target = map.getEndPoint();
 
         while(!openSet.isEmpty()){
-            currentPoint = //next node with lowest f()
-            if (currentPoint = map.getEndPoint()) 
-                return reconstructPath(currentPoint);
-            openSet.remove(currentPoint);
-            closedSet.add(currentPoint);
+            currentNode = openSet.pollFirst();
+            if (currentNode.location == target) 
+                return reconstructPath(currentNode);
+            closedSet.add(currentNode);
+            Point[] neighbors = map.getNeighbors(currentNode.location);
+            for(int i = 0; i < neighbors.length; i++) {
+                PathNode node = new PathNode(   neighbors[i],
+                                                currentNode,
+                                                currentNode.costToHere + map.getCost(currentNode.location, neighbors[i]),
+                                                map.getTile(neighbors[i]));
+                if(closedSet.contains(node)) {
+                    continue;
+                }
+                if(!openSet.contains(node)) {
+                    openSet.add(node);
+                }
+            }
 
-            ArrayList
+            // ArrayList
         }
 
         /*
@@ -79,6 +103,6 @@ public class PerfectAI implements AIModule
         }
         */
         // We're done!  Hand it back.
-        return openSet;
+        return path;
     }
 }
