@@ -32,11 +32,26 @@ public class PerfectAI implements AIModule
             costGuessToTarget = 0; // Just getting dijkstra's right now.
             costGuessTotal = costToHere + costGuessToTarget;
         }
+
+        public String toString() {
+            return "PN: x=" + location.x + " y=" + location.y
+                                 + "; Parent: x=" + parent.location.x + " y=" + parent.location.y
+                                 + "; Cost: " + costToHere;
+        }
     }
     // To use some of the provided java data structures we need a comparator to order PathNodes
     private class PathNodeComparator implements Comparator<PathNode> {
         public int compare(PathNode a, PathNode b) {
-            return (int) (a.costGuessTotal - b.costGuessTotal);
+            double diff = (a.costGuessTotal - b.costGuessTotal);
+            if(diff < 0) {
+                return -1;
+            }
+            else if (diff == 0) {
+                return 0;
+            }
+            else {
+                return 1;
+            }
         }
     }
 
@@ -64,7 +79,7 @@ public class PerfectAI implements AIModule
     /// Creates the path to the goal.
     public List<Point> createPath(final TerrainMap map)
     {
-        ArrayList<Point> path = new ArrayList<Point>();
+        //ArrayList<Point> path = new ArrayList<Point>();
         // Holds the resulting path which we call the closedSet
         HashSet<Point> closedSet = new HashSet<Point>();
         // The set of all nodes adjacent to nodes currently or previously picked as path nodes 
@@ -79,10 +94,12 @@ public class PerfectAI implements AIModule
         System.out.println("Start: X=" + currentNode.location.x + " Y=" + currentNode.location.y);
         System.out.println("End: X=" + target.x + " Y=" + target.y);
 
+        //int m = 0;
         while(!openSet.isEmpty()){
             currentNode = openSet.pollFirst();
+            //System.out.println("curr: x=" + currentNode.location.x + " y=" + currentNode.location.y);
             if (currentNode.location.equals(target)) 
-                return reconstructPath(currentNode);
+                //return reconstructPath(currentNode);
             closedSet.add(currentNode.location);
             Point[] neighbors = map.getNeighbors(currentNode.location);
             for(int i = 0; i < neighbors.length; i++) {
@@ -90,22 +107,48 @@ public class PerfectAI implements AIModule
                                                 currentNode,
                                                 currentNode.costToHere + map.getCost(currentNode.location, neighbors[i]),
                                                 map.getTile(neighbors[i]));
+                //System.out.println(node.toString());
                 if(closedSet.contains(node.location)) {
+                    //System.out.println("[" + i + "] skipped");
                     continue;
                 }
                 if(!openSet.contains(node)) {
+                    //System.out.println("[" + i + "] " + neighbors[i].toString());
                     openSet.add(node);
                 }
             }
 
-            // ArrayList
+            //m++;
+            //if(m>5) openSet.clear();
         }
 
-        /*
-        while(!(currentPoint.x == target.x && currentPoint.y == target.y)) {
+        // Holds the resulting path
+        final ArrayList<Point> path = new ArrayList<Point>();
 
+        // Keep track of where we are and add the start point.
+        final Point CurrentPoint = map.getStartPoint();
+        path.add(new Point(CurrentPoint));
+
+        // Keep moving horizontally until we match the target.
+        while(map.getEndPoint().x != CurrentPoint.x)
+        {
+            if(map.getEndPoint().x > CurrentPoint.x)
+                ++CurrentPoint.x;
+            else
+                --CurrentPoint.x;
+            path.add(new Point(CurrentPoint));
         }
-        */
+
+        // Keep moving vertically until we match the target.
+        while(map.getEndPoint().y != CurrentPoint.y)
+        {
+            if(map.getEndPoint().y > CurrentPoint.y)
+                ++CurrentPoint.y;
+            else
+                --CurrentPoint.y;
+            path.add(new Point(CurrentPoint));
+        }
+
         // We're done!  Hand it back.
         return path;
     }
