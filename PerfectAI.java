@@ -95,10 +95,43 @@ public class PerfectAI implements AIModule
         System.out.println("End: X=" + target.x + " Y=" + target.y);
 
         //int m = 0;
+
+        //-------------------------------------------
+        // Holds the resulting path
+        final ArrayList<Point> thispath = new ArrayList<Point>();
+
+        // Keep track of where we are and add the start point.
+        final Point CurrentPoint = map.getStartPoint();
+        thispath.add(new Point(CurrentPoint));
+
+        // Keep moving horizontally until we match the target.
+        while(map.getEndPoint().x != CurrentPoint.x)
+        {
+            if(map.getEndPoint().x > CurrentPoint.x)
+                ++CurrentPoint.x;
+            else
+                --CurrentPoint.x;
+            thispath.add(new Point(CurrentPoint));
+        }
+
+        // Keep moving vertically until we match the target.
+        while(map.getEndPoint().y != CurrentPoint.y)
+        {
+            if(map.getEndPoint().y > CurrentPoint.y)
+                ++CurrentPoint.y;
+            else
+                --CurrentPoint.y;
+            thispath.add(new Point(CurrentPoint));
+        }
+
+        // We're done!  Hand it back.
+        //------------------------------------------- 
         while(!openSet.isEmpty()){
             currentNode = openSet.pollFirst();
             //System.out.println("curr: x=" + currentNode.location.x + " y=" + currentNode.location.y);
             if (currentNode.location.equals(target)) 
+                        return thispath;
+
                 //return reconstructPath(currentNode);
             closedSet.add(currentNode.location);
             Point[] neighbors = map.getNeighbors(currentNode.location);
@@ -121,35 +154,6 @@ public class PerfectAI implements AIModule
             //m++;
             //if(m>5) openSet.clear();
         }
-
-        // Holds the resulting path
-        final ArrayList<Point> path = new ArrayList<Point>();
-
-        // Keep track of where we are and add the start point.
-        final Point CurrentPoint = map.getStartPoint();
-        path.add(new Point(CurrentPoint));
-
-        // Keep moving horizontally until we match the target.
-        while(map.getEndPoint().x != CurrentPoint.x)
-        {
-            if(map.getEndPoint().x > CurrentPoint.x)
-                ++CurrentPoint.x;
-            else
-                --CurrentPoint.x;
-            path.add(new Point(CurrentPoint));
-        }
-
-        // Keep moving vertically until we match the target.
-        while(map.getEndPoint().y != CurrentPoint.y)
-        {
-            if(map.getEndPoint().y > CurrentPoint.y)
-                ++CurrentPoint.y;
-            else
-                --CurrentPoint.y;
-            path.add(new Point(CurrentPoint));
-        }
-
-        // We're done!  Hand it back.
-        return path;
+        return thispath;
     }
 }
