@@ -57,15 +57,16 @@ public class PerfectAI implements AIModule
         }
     }
 
-    // private List<Point> reconstructPath(Point p) {
-    //     Stack<Point> s = new Stack<Point>();
-    //     while(p.parent != null) {
-    //         s.push(p.location);
-    //         p = p.parent;
-    //     }
-    //     s.push(p.location);
-    //     return s;
-    // }
+    private List<Point> reconstructPath(Point p) {
+        Stack<Point> s = new Stack<Point>();
+        Point curr = new Point();
+        while(p != null) {
+            s.push(p.location);
+            p = p.parent;
+        }
+        s.push(p.location);
+        return s;
+    }
 
     /// Creates the path to the goal.
     public List<Point> createPath(final TerrainMap map)
