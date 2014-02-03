@@ -33,7 +33,7 @@ public class PerfectAI implements AIModule
             costGuessTotal = costToHere + costGuessToTarget;
         }
     }
-    // To use some of the provided java data structures we need a comparator so order PathNodes
+    // To use some of the provided java data structures we need a comparator to order PathNodes
     private class PathNodeComparator implements Comparator<PathNode> {
         public int compare(PathNode a, PathNode b) {
             return (int) (a.costGuessTotal - b.costGuessTotal);
@@ -64,7 +64,7 @@ public class PerfectAI implements AIModule
     {
         ArrayList<Point> path = new ArrayList<Point>();
         // Holds the resulting path which we call the closedSet
-        HashSet<PathNode> closedSet = new HashSet<PathNode>();
+        HashSet<Point> closedSet = new HashSet<Point>();
         // The set of all nodes adjacent to nodes currently or previously picked as path nodes 
         TreeSet<PathNode> openSet = new TreeSet<PathNode>(new PathNodeComparator());
         
@@ -74,19 +74,21 @@ public class PerfectAI implements AIModule
         openSet.add(currentNode);
 
         final Point target = map.getEndPoint();
+        System.out.println("Start: X=" + currentNode.location.x + " Y=" + currentNode.location.y);
+        System.out.println("End: X=" + target.x + " Y=" + target.y);
 
         while(!openSet.isEmpty()){
             currentNode = openSet.pollFirst();
-            if (currentNode.location == target) 
+            if (currentNode.location.equals(target)) 
                 return reconstructPath(currentNode);
-            closedSet.add(currentNode);
+            closedSet.add(currentNode.location);
             Point[] neighbors = map.getNeighbors(currentNode.location);
             for(int i = 0; i < neighbors.length; i++) {
                 PathNode node = new PathNode(   neighbors[i],
                                                 currentNode,
                                                 currentNode.costToHere + map.getCost(currentNode.location, neighbors[i]),
                                                 map.getTile(neighbors[i]));
-                if(closedSet.contains(node)) {
+                if(closedSet.contains(node.location)) {
                     continue;
                 }
                 if(!openSet.contains(node)) {
