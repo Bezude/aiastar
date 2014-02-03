@@ -281,7 +281,7 @@ public final class TerrainMap
      */
     public double getCost(final Point p1, final Point p2)
     {
-         //return getTile(p2) /  (getTile(p1)+1.0);
+        //return getTile(p2) /  (getTile(p1)+1.0);
 	   return Math.exp(getTile(p2) - getTile(p1));
     }
     
