@@ -17,6 +17,8 @@ import java.util.Map;
  */
 public class PerfectAI implements AIModule
 {
+    HashMap<Point, Double> gScore = new HashMap<Point, Double>();
+    
     private class PathNode {
         // Location this node represents
         public Point location;
@@ -44,7 +46,9 @@ public class PerfectAI implements AIModule
     // To use some of the provided java data structures we need a comparator to order PathNodes
     private class PointComparator implements Comparator<Point> {
         public int compare(Point a, Point b) {
-            double diff = (a.costGuessTotal - b.costGuessTotal);
+            double aGScore = gScore.get(a);
+            double bGScore = gScore.get(b);
+            double diff = (aGScore - bGScore);
             if(diff < 0) {
                 return -1;
             }
@@ -57,14 +61,21 @@ public class PerfectAI implements AIModule
         }
     }
 
-    private List<Point> reconstructPath(Point p) {
+    private List<Point> reconstructPath(HashMap<Point, Point> cameFrom, Point p) {
         Stack<Point> s = new Stack<Point>();
         Point curr = new Point();
-        while(p != null) {
-            s.push(p.location);
-            p = p.parent;
+        curr = p;
+        boolean isNull = true;
+        while(isNull) {
+            s.push(curr);
+            curr = cameFrom.get(curr);
+            if(curr == null)
+                isNull = false;
         }
-        s.push(p.location);
+        List<Point> thePath= new ArrayList<Point>();
+        for(int i = 0; i < s.size(); i++){
+            thePath.add(s.pop());
+        }
         return s;
     }
 
@@ -76,12 +87,13 @@ public class PerfectAI implements AIModule
         HashSet<Point> closedSet = new HashSet<Point>();
         // The set of all nodes adjacent to nodes currently or previously picked as path nodes 
         TreeSet<Point> openSet = new TreeSet<Point>(new PointComparator());
-        Map<Point, Point> cameFrom = new HashMap<Point, Point>();
-        Map<Point, double> gScore = new HashMap<Point, double>();
+        HashMap<Point, Point> cameFrom = new HashMap<Point, Point>();
+
 
         // Keep track of where we are and add the start point.
-        Point current = new Point(map.getStartPoint());
-        gScore.put(current, 0);
+        Point current = new Point();
+        current = map.getStartPoint();
+        gScore.put(current, new Double(0));
         cameFrom.put(current, null);
         openSet.add(current);
 
@@ -92,50 +104,50 @@ public class PerfectAI implements AIModule
         // Holds the resulting path
         final ArrayList<Point> thispath = new ArrayList<Point>();
 
-        // Keep track of where we are and add the start point.
-        final Point CurrentPoint = map.getStartPoint();
-        thispath.add(new Point(CurrentPoint));
+        // // Keep track of where we are and add the start point.
+        // final Point CurrentPoint = map.getStartPoint();
+        // thispath.add(new Point(CurrentPoint));
 
-        // Keep moving horizontally until we match the target.
-        while(map.getEndPoint().x != CurrentPoint.x)
-        {
-            if(map.getEndPoint().x > CurrentPoint.x)
-                ++CurrentPoint.x;
-            else
-                --CurrentPoint.x;
-            thispath.add(new Point(CurrentPoint));
-        }
+        // // Keep moving horizontally until we match the target.
+        // while(map.getEndPoint().x != CurrentPoint.x)
+        // {
+        //     if(map.getEndPoint().x > CurrentPoint.x)
+        //         ++CurrentPoint.x;
+        //     else
+        //         --CurrentPoint.x;
+        //     thispath.add(new Point(CurrentPoint));
+        // }
 
-        // Keep moving vertically until we match the target.
-        while(map.getEndPoint().y != CurrentPoint.y)
-        {
-            if(map.getEndPoint().y > CurrentPoint.y)
-                ++CurrentPoint.y;
-            else
-                --CurrentPoint.y;
-            thispath.add(new Point(CurrentPoint));
-        }
+        // // Keep moving vertically until we match the target.
+        // while(map.getEndPoint().y != CurrentPoint.y)
+        // {
+        //     if(map.getEndPoint().y > CurrentPoint.y)
+        //         ++CurrentPoint.y;
+        //     else
+        //         --CurrentPoint.y;
+        //     thispath.add(new Point(CurrentPoint));
+        // }
 
         // We're done!  Hand it back.
         //------------------------------------------- 
         while(!openSet.isEmpty()){
             current = openSet.pollFirst();
-            //System.out.println("curr: x=" + current.location.x + " y=" + current.location.y);
+            System.out.println("curr: x=" + current.x + " y=" + current.y);
             if (current.equals(target)) 
-                return reconstructPath(current);
+                return reconstructPath(cameFrom, current);
                 //return thispath;
                 
             closedSet.add(current);
             Point[] neighbors = map.getNeighbors(current);
             for(int i = 0; i < neighbors.length; i++) {
-                double tentativeGScore = current + map.getCost(current.location, neighbors[i]);
-                    Point neighbor = neighbors[i];
+                Point neighbor = neighbors[i];
+                double tentativeGScore = gScore.get(current) + map.getCost(current, neighbor);
                 //System.out.println(node.toString());
                 if(closedSet.contains(neighbor)) {
                     //System.out.println("[" + i + "] skipped");
                     continue;
                 }
-                if(!openSet.contains(neighbor || tentativeGScore < map.getCost(start, neighbors[i])) {
+                if(!openSet.contains(neighbor) || (tentativeGScore < map.getCost(start, neighbor))) {
                     cameFrom.put(neighbor, current);
                     gScore.put(neighbor, (gScore.get(current) + map.getCost(current, neighbor)));                
                 } else if(!openSet.contains(neighbor)){
