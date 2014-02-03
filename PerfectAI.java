@@ -50,12 +50,14 @@ public class PerfectAI implements AIModule
     //     return path;
     // }
     private List<Point> reconstructPath(PathNode p) {
+        System.out.println("My End: X=" + p.location.x + " Y=" + p.location.y);
         Stack<Point> s = new Stack<Point>();
         while(p.parent != null) {
             s.push(p.location);
             p = p.parent;
         }
         s.push(p.location);
+        System.out.println("My Start: X=" + p.location.x + " Y=" + p.location.y);
         return s;
     }
 
