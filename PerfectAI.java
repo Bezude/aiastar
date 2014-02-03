@@ -6,6 +6,8 @@ import java.util.TreeSet;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Stack;
+import java.util.HashMap;
+import java.util.Map;
 
 /// An implementation of A*
 /**
@@ -40,8 +42,8 @@ public class PerfectAI implements AIModule
         }
     }
     // To use some of the provided java data structures we need a comparator to order PathNodes
-    private class PathNodeComparator implements Comparator<PathNode> {
-        public int compare(PathNode a, PathNode b) {
+    private class PointComparator implements Comparator<Point> {
+        public int compare(Point a, Point b) {
             double diff = (a.costGuessTotal - b.costGuessTotal);
             if(diff < 0) {
                 return -1;
@@ -55,26 +57,15 @@ public class PerfectAI implements AIModule
         }
     }
 
-    // private List<Point> reonstructPath(Point point) {
-    //     List<point> path = new List<Point>();
-    //     while(!(point.getPreviousNode() == null)) {
-    //         point.prependWayPoint(node);
-    //         point = point.getPreviousNode();
+    // private List<Point> reconstructPath(Point p) {
+    //     Stack<Point> s = new Stack<Point>();
+    //     while(p.parent != null) {
+    //         s.push(p.location);
+    //         p = p.parent;
     //     }
-    //     this.shortestPath = path;
-    //     return path;
+    //     s.push(p.location);
+    //     return s;
     // }
-    private List<Point> reconstructPath(PathNode p) {
-        System.out.println("My End: X=" + p.location.x + " Y=" + p.location.y);
-        Stack<Point> s = new Stack<Point>();
-        while(p.parent != null) {
-            s.push(p.location);
-            p = p.parent;
-        }
-        s.push(p.location);
-        System.out.println("My Start: X=" + p.location.x + " Y=" + p.location.y);
-        return s;
-    }
 
     /// Creates the path to the goal.
     public List<Point> createPath(final TerrainMap map)
@@ -83,18 +74,18 @@ public class PerfectAI implements AIModule
         // Holds the resulting path which we call the closedSet
         HashSet<Point> closedSet = new HashSet<Point>();
         // The set of all nodes adjacent to nodes currently or previously picked as path nodes 
-        TreeSet<PathNode> openSet = new TreeSet<PathNode>(new PathNodeComparator());
-        
+        TreeSet<Point> openSet = new TreeSet<Point>(new PointComparator());
+        Map<Point, Point> cameFrom = new HashMap<Point, Point>();
+        Map<Point, double> gScore = new HashMap<Point, double>();
 
         // Keep track of where we are and add the start point.
-        PathNode currentNode = new PathNode(map.getStartPoint(), null, 0, map.getTile(map.getStartPoint()));
-        openSet.add(currentNode);
+        Point current = new Point(map.getStartPoint());
+        gScore.put(current, 0);
+        cameFrom.put(current, null);
+        openSet.add(current);
 
+        final Point start = map.getStartPoint();
         final Point target = map.getEndPoint();
-        System.out.println("Start: X=" + currentNode.location.x + " Y=" + currentNode.location.y);
-        System.out.println("End: X=" + target.x + " Y=" + target.y);
-
-        //int m = 0;
 
         //-------------------------------------------
         // Holds the resulting path
@@ -127,28 +118,29 @@ public class PerfectAI implements AIModule
         // We're done!  Hand it back.
         //------------------------------------------- 
         while(!openSet.isEmpty()){
-            currentNode = openSet.pollFirst();
-            //System.out.println("curr: x=" + currentNode.location.x + " y=" + currentNode.location.y);
-            if (currentNode.location.equals(target)) 
-                        return thispath;
-
-                //return reconstructPath(currentNode);
-            closedSet.add(currentNode.location);
-            Point[] neighbors = map.getNeighbors(currentNode.location);
+            current = openSet.pollFirst();
+            //System.out.println("curr: x=" + current.location.x + " y=" + current.location.y);
+            if (current.equals(target)) 
+                return reconstructPath(current);
+                //return thispath;
+                
+            closedSet.add(current);
+            Point[] neighbors = map.getNeighbors(current);
             for(int i = 0; i < neighbors.length; i++) {
-                PathNode node = new PathNode(   neighbors[i],
-                                                currentNode,
-                                                currentNode.costToHere + map.getCost(currentNode.location, neighbors[i]),
-                                                map.getTile(neighbors[i]));
+                double tentativeGScore = current + map.getCost(current.location, neighbors[i]);
+                    Point neighbor = neighbors[i];
                 //System.out.println(node.toString());
-                if(closedSet.contains(node.location)) {
+                if(closedSet.contains(neighbor)) {
                     //System.out.println("[" + i + "] skipped");
                     continue;
                 }
-                if(!openSet.contains(node)) {
-                    //System.out.println("[" + i + "] " + neighbors[i].toString());
-                    openSet.add(node);
+                if(!openSet.contains(neighbor || tentativeGScore < map.getCost(start, neighbors[i])) {
+                    cameFrom.put(neighbor, current);
+                    gScore.put(neighbor, (gScore.get(current) + map.getCost(current, neighbor)));                
+                } else if(!openSet.contains(neighbor)){
+                    openSet.add(neighbor);
                 }
+
             }
 
             //m++;
