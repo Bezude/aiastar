@@ -50,12 +50,15 @@ public class PerfectAI implements AIModule
             double bGScore = gScore.get(b);
             double diff = (aGScore - bGScore);
             if(diff < 0) {
+                System.out.println("-1");
                 return -1;
             }
             else if (diff == 0) {
+                System.out.println("0");
                 return 0;
             }
             else {
+                System.out.println("1");
                 return 1;
             }
         }
@@ -100,36 +103,10 @@ public class PerfectAI implements AIModule
         final Point start = map.getStartPoint();
         final Point target = map.getEndPoint();
 
-        //-------------------------------------------
-        // Holds the resulting path
+        // Holds the resulting path, its garbage
         final ArrayList<Point> thispath = new ArrayList<Point>();
 
-        // // Keep track of where we are and add the start point.
-        // final Point CurrentPoint = map.getStartPoint();
-        // thispath.add(new Point(CurrentPoint));
 
-        // // Keep moving horizontally until we match the target.
-        // while(map.getEndPoint().x != CurrentPoint.x)
-        // {
-        //     if(map.getEndPoint().x > CurrentPoint.x)
-        //         ++CurrentPoint.x;
-        //     else
-        //         --CurrentPoint.x;
-        //     thispath.add(new Point(CurrentPoint));
-        // }
-
-        // // Keep moving vertically until we match the target.
-        // while(map.getEndPoint().y != CurrentPoint.y)
-        // {
-        //     if(map.getEndPoint().y > CurrentPoint.y)
-        //         ++CurrentPoint.y;
-        //     else
-        //         --CurrentPoint.y;
-        //     thispath.add(new Point(CurrentPoint));
-        // }
-
-        // We're done!  Hand it back.
-        //------------------------------------------- 
         while(!openSet.isEmpty()){
             current = openSet.pollFirst();
             System.out.println("curr: x=" + current.x + " y=" + current.y);
@@ -141,16 +118,17 @@ public class PerfectAI implements AIModule
             Point[] neighbors = map.getNeighbors(current);
             for(int i = 0; i < neighbors.length; i++) {
                 Point neighbor = neighbors[i];
+                System.out.println(neighbor.x + ", " + neighbor.y);
                 double tentativeGScore = gScore.get(current) + map.getCost(current, neighbor);
                 //System.out.println(node.toString());
                 if(closedSet.contains(neighbor)) {
-                    //System.out.println("[" + i + "] skipped");
                     continue;
                 }
-                if(!openSet.contains(neighbor) || (tentativeGScore < map.getCost(start, neighbor))) {
+                if(!openSet.contains(neighbor) || (tentativeGScore < gScore.get(neighbor))) {
                     cameFrom.put(neighbor, current);
                     gScore.put(neighbor, (gScore.get(current) + map.getCost(current, neighbor)));                
-                } else if(!openSet.contains(neighbor)){
+                } 
+                else if(!openSet.contains(neighbor)) {
                     openSet.add(neighbor);
                 }
 
